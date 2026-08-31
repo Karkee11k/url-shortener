@@ -23,6 +23,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
 	runtimeOnly("com.h2database:h2")
+	runtimeOnly("com.mysql:mysql-connector-j:8.4.0")
 
 	compileOnly("org.projectlombok:lombok:1.18.46")
 	annotationProcessor("org.projectlombok:lombok:1.18.46")
