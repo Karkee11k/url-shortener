@@ -15,14 +15,25 @@ public class UrlMapping {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
+    @Column(unique = true)
     private String shortCode;
 
     @Column(nullable = false)
     private String originalUrl;
 
+    public UrlMapping(Long id, String shortCode, String originalUrl) {
+        this.id = id;
+        this.shortCode = shortCode;
+        this.originalUrl = originalUrl;
+    }
+
     public UrlMapping(String shortCode, String originalUrl) {
         this.shortCode = shortCode;
         this.originalUrl = originalUrl;
     }
+
+    public UrlMapping(String originalUrl) {
+        this.originalUrl = originalUrl;
+    }
+
 }

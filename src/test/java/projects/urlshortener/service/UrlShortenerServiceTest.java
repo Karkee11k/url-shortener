@@ -2,6 +2,7 @@ package projects.urlshortener.service;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -9,11 +10,11 @@ import projects.urlshortener.entity.UrlMapping;
 import projects.urlshortener.repository.UrlRepository;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class UrlShortenerServiceTest {
@@ -47,6 +48,14 @@ public class UrlShortenerServiceTest {
 
     @Test
     void shouldGenerateUniqueShortCodes() {
+        AtomicLong id = new AtomicLong(10L);
+        when(urlRepository.save(any(UrlMapping.class)))
+                .thenAnswer(invocation -> {
+                    UrlMapping saved = invocation.getArgument(0);
+                    saved.setId(id.incrementAndGet());
+                    return saved;
+                });
+
         var code1 = urlShortenerService.shorten("https://google.com");
         var code2 = urlShortenerService.shorten("https://openai.com");
 
@@ -55,14 +64,33 @@ public class UrlShortenerServiceTest {
 
     @Test
     void shouldSaveUrlMapping() {
+        when(urlRepository.save(any(UrlMapping.class)))
+                .thenAnswer(invocation -> {
+                    UrlMapping saved = invocation.getArgument(0);
+                    saved.setId(10L);
+                    return saved;
+                });
+
         urlShortenerService.shorten("https://example.com");
-        verify(urlRepository).save(any(UrlMapping.class));
+
+        var captor = ArgumentCaptor.forClass(UrlMapping.class);
+        verify(urlRepository, times(2)).save(captor.capture());
+
+        var secondSave = captor.getAllValues().get(1);
+        assertThat(secondSave.getShortCode()).isEqualTo("a");
+        assertThat(secondSave.getOriginalUrl()).isEqualTo("https://example.com");
     }
 
     @Test
-    void shouldReturnGeneratedShortCode() {
-        String shortCode = urlShortenerService.shorten("https://example.com");
+    void shouldGenerateCodeFromPersistedId() {
+        when(urlRepository.save(any(UrlMapping.class)))
+                .thenAnswer(invocation -> {
+                    UrlMapping saved = invocation.getArgument(0);
+                    saved.setId(10L);
+                    return saved;
+                });
 
-        assertThat(shortCode).isNotBlank();
+        var code = urlShortenerService.shorten("https://example.com");
+        assertThat(code).isEqualTo("a");
     }
 }
