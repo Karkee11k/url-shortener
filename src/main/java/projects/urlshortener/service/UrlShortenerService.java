@@ -1,25 +1,28 @@
 package projects.urlshortener.service;
 
 import org.springframework.stereotype.Service;
+import projects.urlshortener.encoder.Base62Encoder;
 import projects.urlshortener.entity.UrlMapping;
 import projects.urlshortener.repository.UrlRepository;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class UrlShortenerService {
 
     private final UrlRepository urlRepository;
+    private final Base62Encoder encoder = new Base62Encoder();
 
     public UrlShortenerService(UrlRepository repository) {
         this.urlRepository = repository;
     }
 
     public String shorten(String originalUrl) {
-        var code = UUID.randomUUID().toString();
-        var urlMapping = new UrlMapping(code, originalUrl);
-        urlRepository.save(urlMapping);
+        var urlMapping = new UrlMapping(originalUrl);
+        var savedUrlMapping = urlRepository.save(urlMapping);
+        var code = encoder.encode(savedUrlMapping.getId());
+        savedUrlMapping.setShortCode(code);
+        urlRepository.save(savedUrlMapping);
         return code;
     }
 
