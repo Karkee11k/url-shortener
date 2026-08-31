@@ -3,11 +3,13 @@ package projects.urlshortener.repository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.data.jpa.test.autoconfigure.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
 import projects.urlshortener.entity.UrlMapping;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @DataJpaTest
+@ActiveProfiles("test")
 public class UrlRepositoryTest {
 
     @Autowired
